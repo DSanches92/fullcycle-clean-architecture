@@ -1,0 +1,20 @@
+# Where are all the schema files located? globs are supported.
+# gqlgen: schema
+schema:
+  - internal/infra/graph/schema.graphqls
+
+# Where should the generated server code go?
+exec:
+  filename: internal/infra/graph/generated/generated.go
+  package: generated
+
+# Where should any generated models go?
+model:
+  filename: internal/infra/graph/model/models_gen.go
+  package: model
+
+# Where should the resolver implementations go?
+resolver:
+  layout: follow-schema
+  dir: internal/infra/graph
+  package: graph

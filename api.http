@@ -1,0 +1,31 @@
+@baseUrl = http://localhost:3000
+
+### Create Order (populate the database)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "id": "123",
+  "price": 100.0,
+  "tax": 10.0
+}
+
+### Create another Order
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "id": "456",
+  "price": 50.0,
+  "tax": 5.0
+}
+
+### List Orders (validate the challenge)
+GET {{baseUrl}}/orders
+Accept: application/json
+
+### Liveness
+GET {{baseUrl}}/healthz
+
+### Readiness
+GET {{baseUrl}}/readyz
