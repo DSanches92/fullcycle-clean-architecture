@@ -24,7 +24,7 @@ services:
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: orders
-      WEB_PORT: "3000"
+      REST_PORT: "3000"
       GRPC_PORT: "3002"
       GRAPHQL_PORT: "3001"
     ports:

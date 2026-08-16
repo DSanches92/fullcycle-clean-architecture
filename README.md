@@ -11,41 +11,60 @@ Neste desafio, você deve implementar a funcionalidade de **Listagem de Orders**
 
 ## Pré-requisitos
 
-TODO: Adicionar aqui os pre requisitos.
+- Docker e Docker Compose instalados.
+- Portas disponíveis na máquina:
+  - REST: `3000`
+  - GraphQL: `3001`
+  - gRPC: `3002`
 
 ## Como Rodar
 
-> TODO: Adicionar aqui, como rodar o projeto.
-> - O comando único de execução (docker compose up).
-> - As portas em que cada serviço (Web, gRPC, GraphQL) está rodando.
+```bash
+docker compose up --build
+```
+
+O comando sobe o banco (MySQL 8), aplica as migrações automaticamente e inicia a aplicação (que aguarda o banco estar pronto antes de rodar as migrações/servidores).
+
+Portas dos serviços:
+
+- **REST (Chi):** `http://localhost:3000`
+  - `POST /orders` — criar pedido
+  - `GET /orders` — listar pedidos
+  - `GET /healthz` — liveness
+  - `GET /readyz` — readiness
+- **GraphQL (gqlgen):** `http://localhost:3001`
+  - Playground: `http://localhost:3001/`
+- **gRPC:** `localhost:3002`
+
+Para testar, use as requisições prontas do arquivo `api.http` (criar e listar pedidos).
 
 ## Requisitos Técnicos
 
-- [ ] **Use Case:** Crie o caso de uso de listagem de pedidos (ListOrdersUseCase).
-- [ ] **Interfaces de Entrada:** Disponibilize o acesso a esse Use Case através de:
-  - [ ] REST: Endpoint GET /orders.
-  - [ ] gRPC: Service ListOrders.
-  - [ ] GraphQL: Query ListOrders.
+- [x] **Use Case:** Crie o caso de uso de listagem de pedidos (ListOrdersUseCase).
+- [x] **Interfaces de Entrada:** Disponibilize o acesso a esse Use Case através de:
+  - [x] REST: Endpoint GET /orders.
+  - [x] gRPC: Service ListOrders.
+  - [x] GraphQL: Query ListOrders.
 
 ## Banco de Dados
 
-- [ ] Crie as **migrações** necessárias para criar as tabelas do banco de dados.
-- [ ] O banco deve ser provisionado via Docker.
+- [x] Crie as **migrações** necessárias para criar as tabelas do banco de dados.
+- [x] O banco deve ser provisionado via Docker.
 
 ## Requisitos de Dockerização (Automação Total)
 
 O avaliador não deve executar nenhum comando manual além do Docker Compose up, então:
 
-- [ ] Container da Aplicação: Você deve criar um Dockerfile para a sua aplicação Go.
-- [ ] Orquestração: O docker-compose.yaml deve subir o banco de dados e o container da aplicação.
-- [ ] Execução Automática: Ao rodar o comando docker compose up:
-  - [ ] O banco de dados deve subir.
-  - [ ] As migrações devem ser aplicadas automaticamente.
-  - [ ] A aplicação deve iniciar e ficar disponível nas portas configuradas.
-  - [ ] *Atenção:* Garanta que a aplicação aguarde o banco estar pronto antes de tentar rodar as migrações ou iniciar (handling de race condition na inicialização).
+- [x] Container da Aplicação: Você deve criar um Dockerfile para a sua aplicação Go.
+- [x] Orquestração: O docker-compose.yaml deve subir o banco de dados e o container da aplicação.
+- [x] Execução Automática: Ao rodar o comando docker compose up:
+  - [x] O banco de dados deve subir.
+  - [x] As migrações devem ser aplicadas automaticamente.
+  - [x] A aplicação deve iniciar e ficar disponível nas portas configuradas.
+  - [x] *Atenção:* Garanta que a aplicação aguarde o banco estar pronto antes de tentar rodar as migrações ou iniciar (handling de race condition na inicialização).
 
 # Arquivos Auxiliares
 
-- [ ] Crie um arquivo `api.http` na raiz contendo as requisições prontas para:
-  - [ ] Criar uma Order (para popular o banco e testar).
-  - [ ] Listar as Orders (para validar o desafio).
+- [x] Crie um arquivo `api.http` na raiz contendo as requisições prontas para:
+  - [x] Criar uma Order (para popular o banco e testar).
+  - [x] Listar as Orders (para validar o desafio).

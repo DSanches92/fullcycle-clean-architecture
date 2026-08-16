@@ -27,6 +27,7 @@ func (l *ListOrdersUseCase) Execute() ([]OrderOutputDTO, error) {
 			Price:      order.Price,
 			Tax:        order.Tax,
 			FinalPrice: order.FinalPrice,
+			CreatedAt:  order.CreatedAt,
 		})
 	}
 

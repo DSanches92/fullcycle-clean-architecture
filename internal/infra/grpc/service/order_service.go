@@ -25,7 +25,6 @@ func NewOrderService(
 
 func (s *OrderService) CreateOrder(ctx context.Context, in *pb.CreateOrderRequest) (*pb.OrderResponse, error) {
 	dto := usecase.OrderInputDTO{
-		ID:    in.GetId(),
 		Price: float64(in.GetPrice()),
 		Tax:   float64(in.GetTax()),
 	}

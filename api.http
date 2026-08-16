@@ -5,7 +5,6 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "id": "123",
   "price": 100.0,
   "tax": 10.0
 }
@@ -15,7 +14,6 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "id": "456",
   "price": 50.0,
   "tax": 5.0
 }

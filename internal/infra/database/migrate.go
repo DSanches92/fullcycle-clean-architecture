@@ -8,49 +8,51 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	migratemysql "github.com/golang-migrate/migrate/v4/database/mysql"
 	filesource "github.com/golang-migrate/migrate/v4/source/file"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
-	migrationsPath       = "file://sql/migrations"
-	maxRetries           = 30
-	retryInterval        = 2 * time.Second
-	dbPingRetries        = 15
-	dbPingRetryInterval  = time.Second
+	migrationsPath      = "file://sql/migrations"
+	maxRetries          = 30
+	retryInterval       = 2 * time.Second
+	dbPingRetries       = 15
+	dbPingRetryInterval = time.Second
 )
 
-// WaitForDB pings the database repeatedly until it accepts connections.
 func WaitForDB(db *sql.DB) error {
 	var lastErr error
-	for i := 0; i < dbPingRetries; i++ {
+
+	for range dbPingRetries {
 		if err := db.Ping(); err == nil {
 			return nil
 		} else {
 			lastErr = err
 		}
+
 		time.Sleep(dbPingRetryInterval)
 	}
-	return fmt.Errorf("database did not become ready after %d attempts: %w", dbPingRetries, lastErr)
+
+	return fmt.Errorf("banco de dados não ficou pronto após %d tentativas: %w", dbPingRetries, lastErr)
 }
 
-// RunMigrations applies pending migrations with retry to handle race conditions
-// between the database container startup and the application boot. It opens its
-// own connection so the caller's *sql.DB is not closed by the migrate driver.
-func RunMigrations(dsn string) error {
+func RunMigrations(dbDriver, connString string) error {
 	var lastErr error
-	for i := 0; i < maxRetries; i++ {
-		if err := runMigrationOnce(dsn); err == nil {
+
+	for range maxRetries {
+		if err := runMigrationOnce(dbDriver, connString); err == nil {
 			return nil
 		} else {
 			lastErr = err
 		}
 		time.Sleep(retryInterval)
 	}
-	return fmt.Errorf("failed to apply migrations after %d attempts: %w", maxRetries, lastErr)
+
+	return fmt.Errorf("falha ao aplicar as migrations após %d tentativas: %w", maxRetries, lastErr)
 }
 
-func runMigrationOnce(dsn string) error {
-	db, err := sql.Open("mysql", dsn)
+func runMigrationOnce(dbDriver, connString string) error {
+	db, err := sql.Open(dbDriver, connString)
 	if err != nil {
 		return err
 	}
@@ -67,7 +69,7 @@ func runMigrationOnce(dsn string) error {
 		return err
 	}
 
-	m, err := migrate.NewWithInstance("file", srcDriver, "mysql", driver)
+	m, err := migrate.NewWithInstance("file", srcDriver, dbDriver, driver)
 	if err != nil {
 		return err
 	}

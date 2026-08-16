@@ -59,7 +59,7 @@ func (*Blank) Descriptor() ([]byte, []int) {
 
 type OrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Price         float32                `protobuf:"fixed32,2,opt,name=price,proto3" json:"price,omitempty"`
 	Tax           float32                `protobuf:"fixed32,3,opt,name=tax,proto3" json:"tax,omitempty"`
 	FinalPrice    float32                `protobuf:"fixed32,4,opt,name=final_price,json=finalPrice,proto3" json:"final_price,omitempty"`
@@ -97,11 +97,11 @@ func (*OrderResponse) Descriptor() ([]byte, []int) {
 	return file_internal_infra_grpc_protofile_order_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *OrderResponse) GetId() string {
+func (x *OrderResponse) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *OrderResponse) GetPrice() float32 {
@@ -171,9 +171,8 @@ func (x *OrderList) GetOrders() []*OrderResponse {
 
 type CreateOrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Price         float32                `protobuf:"fixed32,2,opt,name=price,proto3" json:"price,omitempty"`
-	Tax           float32                `protobuf:"fixed32,3,opt,name=tax,proto3" json:"tax,omitempty"`
+	Price         float32                `protobuf:"fixed32,1,opt,name=price,proto3" json:"price,omitempty"`
+	Tax           float32                `protobuf:"fixed32,2,opt,name=tax,proto3" json:"tax,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -208,13 +207,6 @@ func (*CreateOrderRequest) Descriptor() ([]byte, []int) {
 	return file_internal_infra_grpc_protofile_order_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateOrderRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
 func (x *CreateOrderRequest) GetPrice() float32 {
 	if x != nil {
 		return x.Price
@@ -236,17 +228,16 @@ const file_internal_infra_grpc_protofile_order_proto_rawDesc = "" +
 	")internal/infra/grpc/protofile/order.proto\x12\x02pb\"\a\n" +
 	"\x05Blank\"h\n" +
 	"\rOrderResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05price\x18\x02 \x01(\x02R\x05price\x12\x10\n" +
 	"\x03tax\x18\x03 \x01(\x02R\x03tax\x12\x1f\n" +
 	"\vfinal_price\x18\x04 \x01(\x02R\n" +
 	"finalPrice\"6\n" +
 	"\tOrderList\x12)\n" +
-	"\x06orders\x18\x01 \x03(\v2\x11.pb.OrderResponseR\x06orders\"L\n" +
-	"\x12CreateOrderRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05price\x18\x02 \x01(\x02R\x05price\x12\x10\n" +
-	"\x03tax\x18\x03 \x01(\x02R\x03tax2p\n" +
+	"\x06orders\x18\x01 \x03(\v2\x11.pb.OrderResponseR\x06orders\"<\n" +
+	"\x12CreateOrderRequest\x12\x14\n" +
+	"\x05price\x18\x01 \x01(\x02R\x05price\x12\x10\n" +
+	"\x03tax\x18\x02 \x01(\x02R\x03tax2p\n" +
 	"\fOrderService\x12&\n" +
 	"\n" +
 	"ListOrders\x12\t.pb.Blank\x1a\r.pb.OrderList\x128\n" +

@@ -16,7 +16,6 @@ import (
 // CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, input model.OrderInput) (*model.Order, error) {
 	dto := usecase.OrderInputDTO{
-		ID:    input.ID,
 		Price: input.Price,
 		Tax:   input.Tax,
 	}
@@ -27,10 +26,11 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.OrderInp
 	}
 
 	return &model.Order{
-		ID:         output.ID,
+		ID:         int(output.ID),
 		Price:      output.Price,
 		Tax:        output.Tax,
 		FinalPrice: output.FinalPrice,
+		CreatedAt:  orderCreatedAt(output.CreatedAt),
 	}, nil
 }
 
@@ -44,10 +44,11 @@ func (r *queryResolver) ListOrders(ctx context.Context) ([]*model.Order, error) 
 	var list []*model.Order
 	for _, order := range orders {
 		list = append(list, &model.Order{
-			ID:         order.ID,
+			ID:         int(order.ID),
 			Price:      order.Price,
 			Tax:        order.Tax,
 			FinalPrice: order.FinalPrice,
+			CreatedAt:  orderCreatedAt(order.CreatedAt),
 		})
 	}
 

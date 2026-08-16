@@ -1,20 +1,18 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/DSanches92/fullcycle-clean-architecture/configs"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/infra/database"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/infra/graph"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/infra/graph/generated"
-	grpcservice "github.com/DSanches92/fullcycle-clean-architecture/internal/infra/grpc/service"
 	pb "github.com/DSanches92/fullcycle-clean-architecture/internal/infra/grpc/protofile"
+	grpcservice "github.com/DSanches92/fullcycle-clean-architecture/internal/infra/grpc/service"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/infra/web"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/infra/web/webserver"
 	"github.com/DSanches92/fullcycle-clean-architecture/internal/usecase"
@@ -25,68 +23,49 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
-var (
-	dbDriver     = envOr("DB_DRIVER", "mysql")
-	dbHost       = envOr("DB_HOST", "localhost")
-	dbPort       = envOr("DB_PORT", "3306")
-	dbUser       = envOr("DB_USER", "root")
-	dbPassword   = envOr("DB_PASSWORD", "root")
-	dbName       = envOr("DB_NAME", "orders")
-	webPort      = envOr("WEB_PORT", "3000")
-	grpcPort     = envOr("GRPC_PORT", "3002")
-	graphQLPort  = envOr("GRAPHQL_PORT", "3001")
-)
-
 func main() {
-	db, err := openDB()
+	envs, err := configs.LoadEnvironment()
 	if err != nil {
-		log.Fatalf("failed to open database: %v", err)
-	}
-	defer db.Close()
-
-	if err := database.WaitForDB(db); err != nil {
-		log.Fatalf("database not ready: %v", err)
-	}
-	if err := database.RunMigrations(buildDSN()); err != nil {
-		log.Fatalf("failed to run migrations: %v", err)
+		log.Fatalf("Falha ao carregar as variáveis de ambiente: %v", err)
 	}
 
-	orderRepository := database.NewOrderRepository(db)
+	databaseConn, err := database.DatabaseConn(envs.Database)
+	if err != nil {
+		log.Fatalf("Falha conexão banco de dados: %v", err)
+	}
+	defer databaseConn.Close()
+
+	orderRepository := database.NewOrderRepository(databaseConn)
 
 	createOrderUseCase := usecase.NewCreateOrderUseCase(orderRepository)
 	listOrdersUseCase := usecase.NewListOrdersUseCase(orderRepository)
 
 	// REST server
 	webOrderHandler := web.NewWebOrderHandler(createOrderUseCase, listOrdersUseCase)
-	webServer := webserver.NewWebServer(webOrderHandler, db, ":"+webPort)
+	webServer := webserver.NewWebServer(webOrderHandler, databaseConn, ":"+envs.RestPort)
 	webServer.Setup()
 	go func() {
-		log.Printf("REST server listening on :%s", webPort)
+		log.Printf("Servidor REST ouvindo :%s", envs.RestPort)
 		if err := webServer.Start(); err != nil {
-			log.Fatalf("REST server error: %v", err)
+			log.Fatalf("Erro servidor REST: %v", err)
 		}
 	}()
 
 	// gRPC server
 	grpcServer := grpc.NewServer()
 	orderService := grpcservice.NewOrderService(createOrderUseCase, listOrdersUseCase)
+
 	pb.RegisterOrderServiceServer(grpcServer, orderService)
 	reflection.Register(grpcServer)
-	lis, err := net.Listen("tcp", ":"+grpcPort)
+
+	lis, err := net.Listen("tcp", ":"+envs.GrpcPort)
 	if err != nil {
-		log.Fatalf("failed to listen on gRPC port: %v", err)
+		log.Fatalf("Falha ao ouvir a porta no servidor gRPC: %v", err)
 	}
 	go func() {
-		log.Printf("gRPC server listening on :%s", grpcPort)
+		log.Printf("Servidor gRPC ouvindo :%s", envs.GrpcPort)
 		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("gRPC server error: %v", err)
+			log.Fatalf("Erro servidor gRPC: %v", err)
 		}
 	}()
 
@@ -101,19 +80,11 @@ func main() {
 	graphqlRouter.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	graphqlRouter.Handle("/query", srv)
 	go func() {
-		log.Printf("GraphQL server listening on :%s", graphQLPort)
-		if err := http.ListenAndServe(":"+graphQLPort, graphqlRouter); err != nil {
-			log.Fatalf("GraphQL server error: %v", err)
+		log.Printf("Servidor GraphQL ouvindo :%s", envs.GraphQLPort)
+		if err := http.ListenAndServe(":"+envs.GraphQLPort, graphqlRouter); err != nil {
+			log.Fatalf("Erro servidor GraphQL: %v", err)
 		}
 	}()
 
 	select {}
-}
-
-func openDB() (*sql.DB, error) {
-	return sql.Open(dbDriver, buildDSN())
-}
-
-func buildDSN() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPassword, dbHost, dbPort, dbName)
 }

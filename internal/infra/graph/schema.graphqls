@@ -1,12 +1,14 @@
+scalar Time
+
 type Order {
-  id: String!
+  ID: Int!
   Price: Float!
   Tax: Float!
   FinalPrice: Float!
+  CreatedAt: Time!
 }
 
 input OrderInput {
-  id: String!
   Price: Float!
   Tax: Float!
 }
