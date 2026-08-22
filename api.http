@@ -27,3 +27,19 @@ GET {{baseUrl}}/healthz
 
 ### Readiness
 GET {{baseUrl}}/readyz
+
+### GraphQL - List Orders
+POST http://localhost:3001/query
+Content-Type: application/json
+
+{
+  "query": "{ listOrders { ID Price Tax FinalPrice CreatedAt } }"
+}
+
+### GraphQL - Create Order
+POST http://localhost:3001/query
+Content-Type: application/json
+
+{
+  "query": "mutation { createOrder(input: { Price: 200, Tax: 20 }) { ID Price FinalPrice CreatedAt } }"
+}
